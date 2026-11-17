@@ -1,0 +1,50 @@
+// Design decision: plain android.app.Activity (no AppCompat needed) plus the single
+// dependency androidx.webkit, because WebViewAssetLoader serves the game from the
+// secure https origin https://appassets.androidplatform.net. A file:// URL is not a
+// secure context (navigator.clipboard would fail, localStorage origin is unstable).
+plugins {
+    id 'com.android.application'
+}
+
+android {
+    namespace 'app.riftboundarena.fan'
+    compileSdk 34
+
+    defaultConfig {
+        applicationId "app.riftboundarena.fan"
+        minSdk 24
+        targetSdk 34
+        versionCode 6
+        versionName "6.0"
+    }
+
+    signingConfigs {
+        debug {
+            // Fixed keystore committed to the repo -> identical signature on every CI build,
+            // so new APKs install over old ones without losing saved data.
+            storeFile file('debug.keystore')
+            storePassword 'android'
+            keyAlias 'androiddebugkey'
+            keyPassword 'android'
+        }
+    }
+
+    buildTypes {
+        debug {
+            signingConfig signingConfigs.debug
+        }
+        release {
+            minifyEnabled false
+            signingConfig signingConfigs.debug
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+}
+
+dependencies {
+    implementation 'androidx.webkit:webkit:1.11.0'
+}
